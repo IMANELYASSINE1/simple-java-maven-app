@@ -33,7 +33,7 @@ pipeline {
                     sh '''
                         mvn sonar:sonar \
                           -Dsonar.projectKey=simple-java-maven-app \
-                          -Dsonar.host.url=http://sonarqube:9000 \
+                          -Dsonar.host.url=http://172.17.0.3:9000 \
                           -Dsonar.login=$SONAR_TOKEN
                     '''
                 }
