@@ -1,17 +1,21 @@
 pipeline {
     agent any
-    options {
-        skipStagesAfterUnstable()
-    }
+
     tools {
-        maven 'Maven'
+        maven 'Maven' // Doit correspondre à ton outil Maven dans Jenkins
     }
+
+    environment {
+        SONAR_TOKEN = credentials('mon_token_sonar') // ID du token dans Jenkins Credentials
+    }
+
     stages {
         stage('Build') {
             steps {
                 sh 'mvn -B -DskipTests clean package'
             }
         }
+
         stage('Test') {
             steps {
                 sh 'mvn test'
@@ -22,12 +26,24 @@ pipeline {
                 }
             }
         }
-        stage('Deliver') { 
+
+        stage('SonarQube Analysis') {
             steps {
-                sh './jenkins/scripts/deliver.sh' 
+                withSonarQubeEnv('SonarServer') { // Doit correspondre au nom du serveur Sonar dans Jenkins
+                    sh '''
+                        mvn sonar:sonar \
+                          -Dsonar.projectKey=simple-java-maven-app \
+                          -Dsonar.host.url=http://localhost:9000 \
+                          -Dsonar.login=$SONAR_TOKEN
+                    '''
+                }
+            }
+        }
+
+        stage('Deliver') {
+            steps {
+                sh './jenkins/scripts/deliver.sh'
             }
         }
     }
 }
-
-        
